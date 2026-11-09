@@ -9,6 +9,7 @@ export type SettingsScreenProps = {
   onSelectBase: (base: Base) => void;
   onSelectLength: (length: number) => void;
   onStart: () => void;
+  onShowRecords: () => void;
 };
 
 export function renderSettingsScreen(props: SettingsScreenProps): HTMLElement {
@@ -69,12 +70,18 @@ export function renderSettingsScreen(props: SettingsScreenProps): HTMLElement {
 
   summary.append(summaryLabel, summaryValue);
 
+  const actions = el('div', 'actions');
   const startButton = el('button', 'primary', 'Start game');
+  const recordsButton = el('button', 'secondary', 'Records');
 
   startButton.type = 'button';
-  startButton.addEventListener('click', props.onStart);
+  recordsButton.type = 'button';
 
-  card.append(title, subtitle, baseField, lengthField, summary, startButton);
+  startButton.addEventListener('click', props.onStart);
+  recordsButton.addEventListener('click', props.onShowRecords);
+
+  actions.append(startButton, recordsButton);
+  card.append(title, subtitle, baseField, lengthField, summary, actions);
   screen.append(card);
 
   return screen;

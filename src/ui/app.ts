@@ -9,9 +9,11 @@ import { loadRecords, saveRecords } from '../storage/recordsStorage';
 import { formatDuration } from './format';
 import { renderGameScreen } from './gameScreen';
 import { BASE_LABELS } from './options';
+import { renderRecordsScreen } from './recordsScreen';
 import { renderSettingsScreen } from './settingsScreen';
 
-type View = 'settings' | 'game';
+type View = 'settings' | 'game' | 'records';
+type ReturnView = 'settings' | 'game';
 
 const DEFAULT_BASE: Base = 10;
 const DEFAULT_LENGTH = 4;
@@ -22,6 +24,7 @@ let records: GameRecord[] = loadRecords();
 let selectedBase: Base = DEFAULT_BASE;
 let selectedLength = DEFAULT_LENGTH;
 let view: View = 'settings';
+let recordsReturnView: ReturnView = 'settings';
 let message = '';
 let timerId: number | null = null;
 
@@ -39,6 +42,19 @@ function render(): void {
         onSelectBase: handleSelectBase,
         onSelectLength: handleSelectLength,
         onStart: handleStart,
+        onShowRecords: handleShowRecords,
+      }),
+    );
+
+    return;
+  }
+
+  if (view === 'records') {
+    rootEl.replaceChildren(
+      renderRecordsScreen({
+        records,
+        onBack: handleBackFromRecords,
+        onNewGame: resetToSettings,
       }),
     );
 
@@ -52,6 +68,7 @@ function render(): void {
       elapsedMs: getElapsedMs(state, Date.now()),
       onSubmit: handleGuess,
       onNewGame: resetToSettings,
+      onShowRecords: handleShowRecords,
     }),
   );
 
@@ -140,6 +157,21 @@ function saveResult(): void {
   saveRecords(records);
 }
 
+function handleShowRecords(): void {
+  if (view !== 'records') {
+    recordsReturnView = view;
+  }
+
+  records = loadRecords();
+  view = 'records';
+  render();
+}
+
+function handleBackFromRecords(): void {
+  view = recordsReturnView;
+  render();
+}
+
 function startTimer(): void {
   stopTimer();
 
@@ -163,6 +195,7 @@ function resetToSettings(): void {
   stopTimer();
   state = createInitialState();
   message = '';
+  recordsReturnView = 'settings';
   view = 'settings';
   render();
 }

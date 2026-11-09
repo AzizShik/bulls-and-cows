@@ -194,6 +194,7 @@ input {
 
 .actions > * {
   flex: 1;
+  width: auto;
 }
 
 .game-header {
@@ -345,6 +346,55 @@ input {
   font-family: var(--font-mono);
   font-size: 18px;
   letter-spacing: 0.06em;
+}
+
+.records-list {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.record-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.record-item:hover {
+  border-color: var(--accent);
+}
+
+.record-rank {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.record-attempts {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-time {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
 button:focus-visible,

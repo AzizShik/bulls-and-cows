@@ -10,6 +10,7 @@ export type GameScreenProps = {
   elapsedMs: number;
   onSubmit: (guess: string) => void;
   onNewGame: () => void;
+  onShowRecords: () => void;
 };
 
 export function renderGameScreen(props: GameScreenProps): HTMLElement {
@@ -64,10 +65,13 @@ export function renderGameScreen(props: GameScreenProps): HTMLElement {
 
     const actions = el('div', 'actions');
     const newGame = el('button', 'primary', 'New game');
+    const recordsButton = el('button', 'secondary', 'Records');
 
     newGame.type = 'button';
+    recordsButton.type = 'button';
     newGame.addEventListener('click', props.onNewGame);
-    actions.append(newGame);
+    recordsButton.addEventListener('click', props.onShowRecords);
+    actions.append(newGame, recordsButton);
 
     card.append(actions);
   } else {
