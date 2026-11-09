@@ -8,7 +8,9 @@ export type GameRecord = {
 };
 
 export function compareRecords(a: GameRecord, b: GameRecord): number {
-  throw new Error(`${a}, ${b} compareRecord is not implemented`);
+  if (a.attempts !== b.attempts) return a.attempts - b.attempts;
+  if (a.durationMs !== b.durationMs) return a.durationMs - b.durationMs;
+  return a.date.localeCompare(b.date);
 }
 
 export function addRecord(
@@ -16,5 +18,5 @@ export function addRecord(
   record: GameRecord,
   limit = 10,
 ): GameRecord[] {
-  throw new Error(`${records}, ${record}, ${limit} addRecord is not implemented`);
+  return [...records, record].sort(compareRecords).slice(0, limit);
 }
