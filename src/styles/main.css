@@ -222,6 +222,131 @@ input {
   font-size: 13px;
 }
 
+.badge--timer {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.guess-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.guess-input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 24px;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+}
+
+.guess-form .primary {
+  flex: 0 0 auto;
+  width: auto;
+  padding-inline: 20px;
+}
+
+.hint {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.message {
+  min-height: 1.5em;
+  margin: 8px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.history {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.history-title {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.attempt-number {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.attempt-guess {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.14em;
+}
+
+.bulls {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.cows {
+  color: var(--cows);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.result {
+  margin: 18px 0 0;
+  padding: 16px;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 12px;
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.result-line {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+}
+
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent);
@@ -236,5 +361,13 @@ input:focus-visible {
   .summary {
     flex-direction: column;
     gap: 4px;
+  }
+
+  .guess-form {
+    flex-direction: column;
+  }
+
+  .guess-form .primary {
+    width: 100%;
   }
 }

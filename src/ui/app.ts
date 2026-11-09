@@ -1,7 +1,13 @@
-import { createInitialState, startRound } from '../core/gameState';
+import { addAttempt, createInitialState, getElapsedMs, isWon, startRound } from '../core/gameState';
 import type { Base, GameState } from '../core/gameState';
+import { evaluateGuess } from '../core/evaluateGuess';
 import { generateSecret } from '../core/generateSecret';
-import { el } from './dom';
+import { isValidGuess } from '../core/isValidGuess';
+import { addRecord } from '../core/records';
+import type { GameRecord } from '../core/records';
+import { loadRecords, saveRecords } from '../storage/recordsStorage';
+import { formatDuration } from './format';
+import { renderGameScreen } from './gameScreen';
 import { BASE_LABELS } from './options';
 import { renderSettingsScreen } from './settingsScreen';
 
@@ -12,9 +18,12 @@ const DEFAULT_LENGTH = 4;
 
 let rootEl: HTMLElement;
 let state: GameState = createInitialState();
+let records: GameRecord[] = loadRecords();
 let selectedBase: Base = DEFAULT_BASE;
 let selectedLength = DEFAULT_LENGTH;
 let view: View = 'settings';
+let message = '';
+let timerId: number | null = null;
 
 export function mountApp(root: HTMLElement): void {
   rootEl = root;
@@ -22,19 +31,33 @@ export function mountApp(root: HTMLElement): void {
 }
 
 function render(): void {
-  const screen = view === 'settings' ? renderSettings() : renderGamePlaceholder();
+  if (view === 'settings') {
+    rootEl.replaceChildren(
+      renderSettingsScreen({
+        selectedBase,
+        selectedLength,
+        onSelectBase: handleSelectBase,
+        onSelectLength: handleSelectLength,
+        onStart: handleStart,
+      }),
+    );
 
-  rootEl.replaceChildren(screen);
-}
+    return;
+  }
 
-function renderSettings(): HTMLElement {
-  return renderSettingsScreen({
-    selectedBase,
-    selectedLength,
-    onSelectBase: handleSelectBase,
-    onSelectLength: handleSelectLength,
-    onStart: handleStart,
-  });
+  rootEl.replaceChildren(
+    renderGameScreen({
+      state,
+      message,
+      elapsedMs: getElapsedMs(state, Date.now()),
+      onSubmit: handleGuess,
+      onNewGame: resetToSettings,
+    }),
+  );
+
+  if (state.status === 'playing') {
+    rootEl.querySelector<HTMLInputElement>('.guess-input')?.focus();
+  }
 }
 
 function handleSelectBase(base: Base): void {
@@ -57,41 +80,89 @@ function handleStart(): void {
   const secret = generateSecret(settings.length, settings.base);
 
   state = startRound(settings, secret, Date.now());
+  message = '';
   view = 'game';
+  startTimer();
   render();
 }
 
-function renderGamePlaceholder(): HTMLElement {
-  const screen = el('section', 'screen game-screen');
-  const card = el('div', 'card');
+function handleGuess(rawGuess: string): void {
+  if (state.status !== 'playing' || state.settings === null || state.secret === null) {
+    return;
+  }
 
-  const header = el('div', 'game-header');
-  const settingsBadge = el(
-    'span',
-    'badge',
-    state.settings ? `${state.settings.length} · ${BASE_LABELS[state.settings.base]}` : '',
-  );
+  const { length, base } = state.settings;
+  const guess = rawGuess.trim().toLowerCase();
 
-  header.append(settingsBadge, el('span', 'muted', 'Round started'));
+  if (!isValidGuess(guess, length, base)) {
+    message = `Enter ${length} unique digits valid for ${BASE_LABELS[base]} base.`;
+    render();
+    return;
+  }
 
-  const title = el('h2', 'title title--small', 'Game screen');
-  const subtitle = el('p', 'subtitle', 'Secret generated.');
+  if (state.history.some((attempt) => attempt.guess === guess)) {
+    message = 'This guess was already tried.';
+    render();
+    return;
+  }
 
-  const actions = el('div', 'actions');
-  const newGameButton = el('button', 'secondary', 'New game');
+  const { bulls, cows } = evaluateGuess(state.secret, guess);
 
-  newGameButton.type = 'button';
-  newGameButton.addEventListener('click', resetToSettings);
-  actions.append(newGameButton);
+  state = addAttempt(state, {
+    guess,
+    bulls,
+    cows,
+    at: Date.now(),
+  });
 
-  card.append(header, title, subtitle, actions);
-  screen.append(card);
+  message = '';
 
-  return screen;
+  if (isWon(state)) {
+    stopTimer();
+    saveResult();
+  }
+
+  render();
+}
+
+function saveResult(): void {
+  if (state.settings === null) {
+    return;
+  }
+
+  records = addRecord(records, {
+    settings: state.settings,
+    attempts: state.history.length,
+    durationMs: getElapsedMs(state, Date.now()),
+    date: new Date().toISOString(),
+  });
+
+  saveRecords(records);
+}
+
+function startTimer(): void {
+  stopTimer();
+
+  timerId = window.setInterval(() => {
+    const timer = rootEl.querySelector<HTMLElement>('[data-timer]');
+
+    if (timer) {
+      timer.textContent = formatDuration(getElapsedMs(state, Date.now()));
+    }
+  }, 250);
+}
+
+function stopTimer(): void {
+  if (timerId !== null) {
+    clearInterval(timerId);
+    timerId = null;
+  }
 }
 
 function resetToSettings(): void {
+  stopTimer();
   state = createInitialState();
+  message = '';
   view = 'settings';
   render();
 }
