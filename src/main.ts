@@ -1,3 +1,8 @@
-const app = document.createElement('div');
-app.id = 'app';
-document.body.append(app);
+import './styles/main.css';
+import { mountApp } from './ui/app';
+
+const root = document.createElement('div');
+root.id = 'app';
+document.body.append(root);
+
+mountApp(root);
