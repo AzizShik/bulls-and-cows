@@ -22,21 +22,51 @@ export type GameState = {
 };
 
 export function createInitialState(): GameState {
-  throw new Error('createInitialState is not implemented');
+  return {
+    status: 'setup',
+    settings: null,
+    secret: null,
+    history: [],
+    startedAt: null,
+    finishedAt: null,
+  };
 }
 
 export function startRound(settings: Settings, secret: string, now: number): GameState {
-  throw new Error(`${settings}, ${secret}, ${now} startRound is not implemented`);
+  return {
+    status: 'playing',
+    settings: settings,
+    secret: secret,
+    history: [],
+    startedAt: now,
+    finishedAt: null,
+  };
 }
 
 export function addAttempt(state: GameState, attempt: Attempt): GameState {
-  throw new Error(`${state}, ${attempt} addAttempt is not implemented`);
+  if (state.status !== 'playing') return state;
+
+  const isDuplicateGuess = state.history.some((obj) => obj.guess === attempt.guess);
+  if (isDuplicateGuess) return state;
+
+  const history = [...state.history, attempt];
+  const isWin = attempt.bulls === state.settings?.length;
+
+  return {
+    ...state,
+    status: isWin ? 'won' : 'playing',
+    history,
+    finishedAt: isWin ? attempt.at : null,
+  };
 }
 
 export function isWon(state: GameState): boolean {
-  throw new Error(`${state} isWon is not implemented`);
+  return state.status === 'won';
 }
 
 export function getElapsedMs(state: GameState, now: number): number {
-  throw new Error(`${state}, ${now} getElapsedMs is not implemented`);
+  if (state.startedAt === null) return 0;
+
+  const end = state.finishedAt ?? now;
+  return end - state.startedAt;
 }
